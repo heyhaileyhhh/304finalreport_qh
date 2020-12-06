@@ -1,2 +1,2 @@
 # 304finalreport_qh
-STA304 final report
+This is a project for STA304 final project.
