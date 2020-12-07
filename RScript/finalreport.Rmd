@@ -1,0 +1,12 @@
+---
+title: "STA304FinalProject"
+author: "Qihui Huang"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
