@@ -2,8 +2,11 @@
 title: "STA304 Final Report: Causal Inference Analysis on the Factors that affect Life Expectancy"
 author: "QH"
 date: "12/7/2020"
-output: html_document
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
@@ -37,5 +40,7 @@ cleaned_data <- raw_data %>%
 cleaned_data <- na.omit(cleaned_data)
 skim(cleaned_data)
 ```
+
+# References
 
 
