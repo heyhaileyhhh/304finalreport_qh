@@ -1,12 +1,21 @@
 ---
-title: "STA304 Final Report: Analysis the Factors that may affect Life Expectancy"
+title: "STA304 Final Report: Causal Inference Analysis on the Factors that affect Life Expectancy"
 author: "QH"
 date: "12/7/2020"
 output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+```
+
+```{r,echo=FALSE,message=FALSE}
+raw_data <- read_csv("life_expectancy.csv")
+glimpse(raw_data)
+
 ```
 
 # Abstruct
@@ -17,11 +26,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
+
+
 Life expectancy has always been an intriguing topic throughout several centuries, and 
 there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become more and more popular. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy, and build a regression model based off multiple factors considering data in a decade period all around the world. 
 
-Major types of vaccines like Hepatitis B, Polio and Diphtheria will be combined, which means they are all be considered as general vaccine instead of differentiating them.
+The analysis will focus on casual inference of factor immunization rate/number of citizens get vaccinated and life expectancy varies based off this factor. Major types of vaccines like Hepatitis B, Polio and Diphtheria will be combined, which means they are all be considered as general vaccine instead of differentiating them. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Other factors like countries economic condition, mortality and average education level will also be taken into consideration when conduct the multiple linear regression analysis.
 
-In a nutshell, this study will focus on immunization factors, mortality factors, economic factors, social factors and other health related factors as well. Since the observations this dataset are based on different countries, it will be easier for a country to determine the predicting factor which is contributing to lower value of life expectancy. This will help in suggesting a country which area should be given importance in order to efficiently improve the life expectancy of its population.
 
 
