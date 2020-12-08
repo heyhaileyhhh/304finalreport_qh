@@ -10,28 +10,32 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
+library(skimr)
 ```
-
-```{r,echo=FALSE,message=FALSE}
-raw_data <- read_csv("life_expectancy.csv")
-glimpse(raw_data)
-
-```
-
-# Abstruct
-
-
-
 
 
 # Introduction
-
-
 
 Life expectancy has always been an intriguing topic throughout several centuries, and 
 there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become more and more popular. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy, and build a regression model based off multiple factors considering data in a decade period all around the world. 
 
 The analysis will focus on casual inference of factor immunization rate/number of citizens get vaccinated and life expectancy varies based off this factor. Major types of vaccines like Hepatitis B, Polio and Diphtheria will be combined, which means they are all be considered as general vaccine instead of differentiating them. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Other factors like countries economic condition, mortality and average education level will also be taken into consideration when conduct the multiple linear regression analysis.
 
+# Data Cleaning
+
+```{r,echo=FALSE,message=FALSE}
+raw_data <- read_csv("life_expectancy.csv")
+cleaned_data <- raw_data %>%
+  rename(life_expectancy = `Life expectancy`) %>%
+  rename(total_expenditure = `Total expenditure`) %>%
+  rename(Hepatitis_B = `Hepatitis B`) %>%
+  rename(HIV_AIDS = `HIV/AIDS`) %>%
+  rename(healthcoverage_percent = `percentage expenditure`) %>%
+  rename(adult_mortality = `Adult Mortality`) %>%
+  select(life_expectancy, total_expenditure, Hepatitis_B, HIV_AIDS, Alcohol, Schooling,
+         adult_mortality, healthcoverage_percent, Measles, Diphtheria, GDP, BMI)
+cleaned_data <- na.omit(cleaned_data)
+skim(cleaned_data)
+```
 
 
