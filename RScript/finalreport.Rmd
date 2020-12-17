@@ -1,20 +1,32 @@
 ---
-title: "STA304 Final Report: Causal Inference Analysis on the Factors that affect Life Expectancy"
+title: 'STA304 Final Report: Causal Inference Analysis on the Factors that affect
+  Life Expectancy'
 author: "QH"
 date: "12/7/2020"
 output:
+  html_document:
+    df_print: paged
   pdf_document:
     latex_engine: xelatex
 bibliography: reference.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
 library(skimr)
+library(arm)
+library(broom)
+library(huxtable)
+library(dplyr)
 ```
 
+#Absruct
+
+#Key Words
+
+Propensity Score, Causal Inference, Life expectancy, Immunization, Observational study, WHO
 
 # Introduction
 
@@ -23,22 +35,47 @@ there have been lots of studies conducted in the past on factors affecting life 
 
 The analysis will focus on casual inference of factor immunization rate/number of citizens get vaccinated and life expectancy varies based off this factor. Major types of vaccines like Hepatitis B, Polio and Diphtheria will be combined, which means they are all be considered as general vaccine instead of differentiating them. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Other factors like countries economic condition, mortality and average education level will also be taken into consideration when conduct the multiple linear regression analysis.
 
-# Data Cleaning
+
+# Methodology
+
+## Data Description and Data cleaning
+
+A glimpse of cleaned dataset:
 
 ```{r,echo=FALSE,message=FALSE}
+#rename and select predictors/variables for later usage.
 raw_data <- read_csv("life_expectancy.csv")
 cleaned_data <- raw_data %>%
+  rename(country = `Country`) %>%
+  rename(status = `Status`) %>%
+  rename(population = `Population`) %>%
   rename(life_expectancy = `Life expectancy`) %>%
   rename(total_expenditure = `Total expenditure`) %>%
   rename(Hepatitis_B = `Hepatitis B`) %>%
   rename(HIV_AIDS = `HIV/AIDS`) %>%
   rename(healthcoverage_percent = `percentage expenditure`) %>%
-  rename(adult_mortality = `Adult Mortality`) %>%
-  select(life_expectancy, total_expenditure, Hepatitis_B, HIV_AIDS, Alcohol, Schooling,
-         adult_mortality, healthcoverage_percent, Measles, Diphtheria, GDP, BMI)
+  rename(adult_mortality = `Adult Mortality`)
+
+cleaned_data <- cleaned_data %>% 
+  select(country, status, life_expectancy, adult_mortality, Alcohol, healthcoverage_percent, Hepatitis_B, BMI, Polio, total_expenditure, Diphtheria, GDP, Schooling)
+
 cleaned_data <- na.omit(cleaned_data)
-str(cleaned_data)
+
+knitr::kable(cleaned_data[1:10, ])
 ```
+
+## Model
+```{r,echo=FALSE, message=FALSE}
+propensity_score <- glm()
+
+
+
+
+```
+
+
+
+
 
 # References
 
