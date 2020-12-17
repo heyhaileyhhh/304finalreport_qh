@@ -22,7 +22,7 @@ library(huxtable)
 library(dplyr)
 ```
 
-#Absruct
+#Abstruct
 
 #Key Words
 
@@ -40,7 +40,7 @@ The analysis will focus on casual inference of factor immunization rate/number o
 
 ## Data Description and Data Cleaning
 
-The raw dataset sourced from the website @Kaggle has been modified by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned dataset, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables I chose are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. For convenience's sake, especially in matching propensity scores, a new binary variable named *vaccine_coverage_over_ave* been created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming some variables are done in this part as well.
+The raw dataset sourced from the website @Kaggle has been modified by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned dataset, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables I chose are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. For convenience's sake, especially in matching propensity scores, a new binary variable named *vaccine_coverage_over_ave* been created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming variables and removing rows with $NAs$ or invalid numbers are done in this part as well.
 
 A glimpse of cleaned dataset:
 
@@ -57,6 +57,7 @@ cleaned_data <- raw_data %>%
   rename(HIV_AIDS = `HIV/AIDS`) %>%
   rename(healthcoverage_percent = `percentage expenditure`) %>%
   rename(adult_mortality = `Adult Mortality`) %>%
+  filter(Schooling != 0.0) %>%
   dplyr :: select(country, status, life_expectancy, adult_mortality, Alcohol, healthcoverage_percent, Hepatitis_B, BMI, Polio, total_expenditure, Diphtheria, GDP, Schooling)
 
 cleaned_data <- na.omit(cleaned_data)
@@ -73,13 +74,18 @@ knitr::kable(cleaned_data[1:20, ])
 
 ```{r,echo=FALSE, message=FALSE}
 attach(cleaned_data)
-propensity_score <- glm(vaccine_coverage_over_ave ~ country+status+adult_mortality+Alcohol+total_expenditure+GDP+Schooling+BMI,
+propensity_score <- glm(vaccine_coverage_over_ave ~ country+status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling,
                         family = binomial,
                         data = cleaned_data)
 
+# add forecast to our dataset
+cleaned_data <- augment(propensity_score,
+                        data = cleaned_data,
+                        type.predict = "response") %>%
+  dplyr::select(-.resid, -.std.resid, -.hat, -.sigma, -.cooksd)
 
-
-
+cleaned_data <- cleaned_data %>%
+  arrange(.fitted, vaccine_coverage_over_ave)
 ```
 
 
