@@ -1,7 +1,7 @@
 ---
-title: 'STA304 Final Report: Causal Inference Analysis on the Factors that affect
+title: 'STA304 Final Report: Causal Inference Analysis on the Factors that May Affect
   Life Expectancy'
-author: "QH"
+author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
   html_document:
@@ -38,7 +38,9 @@ The analysis will focus on casual inference of factor immunization rate/number o
 
 # Methodology
 
-## Data Description and Data cleaning
+## Data Description and Data Cleaning
+
+The raw dataset sourced from the website @Kaggle has been modified by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned dataset, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables I chose are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. For convenience's sake, especially in matching propensity scores, a new binary variable named *vaccine_coverage_over_ave* been created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming some variables are done in this part as well.
 
 A glimpse of cleaned dataset:
 
@@ -54,19 +56,26 @@ cleaned_data <- raw_data %>%
   rename(Hepatitis_B = `Hepatitis B`) %>%
   rename(HIV_AIDS = `HIV/AIDS`) %>%
   rename(healthcoverage_percent = `percentage expenditure`) %>%
-  rename(adult_mortality = `Adult Mortality`)
-
-cleaned_data <- cleaned_data %>% 
-  select(country, status, life_expectancy, adult_mortality, Alcohol, healthcoverage_percent, Hepatitis_B, BMI, Polio, total_expenditure, Diphtheria, GDP, Schooling)
+  rename(adult_mortality = `Adult Mortality`) %>%
+  dplyr :: select(country, status, life_expectancy, adult_mortality, Alcohol, healthcoverage_percent, Hepatitis_B, BMI, Polio, total_expenditure, Diphtheria, GDP, Schooling)
 
 cleaned_data <- na.omit(cleaned_data)
 
-knitr::kable(cleaned_data[1:10, ])
+# Mutate a binary treatment immunization coverage
+cleaned_data <- cleaned_data %>%
+  mutate(vaccine_total = Polio+Diphtheria+Hepatitis_B) %>%
+  mutate(vaccine_coverage_over_ave = ifelse(vaccine_total >= mean(vaccine_total), 1, 0))
+
+knitr::kable(cleaned_data[1:20, ])
 ```
 
 ## Model
+
 ```{r,echo=FALSE, message=FALSE}
-propensity_score <- glm()
+attach(cleaned_data)
+propensity_score <- glm(vaccine_coverage_over_ave ~ country+status+adult_mortality+Alcohol+total_expenditure+GDP+Schooling+BMI,
+                        family = binomial,
+                        data = cleaned_data)
 
 
 
