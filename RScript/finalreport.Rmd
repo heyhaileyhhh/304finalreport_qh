@@ -3,9 +3,8 @@ title: "STA304 Final Report: Causal Inference Analysis on the Factors that affec
 author: "QH"
 date: "12/7/2020"
 output:
-  html_document:
-    df_print: paged
-  pdf_document: default
+  pdf_document:
+    latex_engine: xelatex
 bibliography: reference.bib
 ---
 
@@ -38,7 +37,7 @@ cleaned_data <- raw_data %>%
   select(life_expectancy, total_expenditure, Hepatitis_B, HIV_AIDS, Alcohol, Schooling,
          adult_mortality, healthcoverage_percent, Measles, Diphtheria, GDP, BMI)
 cleaned_data <- na.omit(cleaned_data)
-skim(cleaned_data)
+str(cleaned_data)
 ```
 
 # References
