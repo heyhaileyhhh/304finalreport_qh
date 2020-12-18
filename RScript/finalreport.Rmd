@@ -4,10 +4,10 @@ title: 'STA304 Final Report: Causal Inference Analysis on the Factors that May A
 author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
-  html_document:
-    df_print: paged
   pdf_document:
     latex_engine: xelatex
+  html_document:
+    df_print: paged
 bibliography: reference.bib
 ---
 
@@ -70,7 +70,7 @@ cleaned_data <- cleaned_data %>%
   mutate(vaccine_total = Polio+Diphtheria+Hepatitis_B) %>%
   mutate(vaccine_coverage_over_ave = ifelse(vaccine_total >= mean(vaccine_total), 1, 0))
 
-knitr::kable(cleaned_data[1:20, ])
+knitr::kable(cleaned_data[1:15, ])
 ```
 
 ## Model
