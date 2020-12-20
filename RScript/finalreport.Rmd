@@ -29,9 +29,9 @@ Propensity Score, Causal Inference, Life expectancy, Immunization, Observational
 
 # Introduction
 
-Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently and minimize effect of confounding factors. Moreover, observational data extracted from WHO is used in this report instead of complete experiment data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
+Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign into two groups, causality cannot be inferred there, but propensity score matching could minimize effect of confounding factors effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
-The main goal of this report is to find a whether a causal relation between life expectancy and ea immunization coverage is presented in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
+The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
 The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to find causal relations between factors with life expectancy. Other factors like countries economic condition, mortality and average education level will also be taken into consideration. In Methodology section(section 2), data cleaning is performed and model is built here. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Results of propensity score matching will be presented in Result section(section 3). Interpretation of the results, graphs, weakness, conclusion and further steps will be included in the Discussion part(section 4).
 
@@ -86,7 +86,6 @@ knitr::kable(cleaned_data[1:15, 2:7])
 
 ## Model
 
-
 The propensity score (probability of being treated) will be estimated by constructing a logistic regression model at first. Our treatment is immunization coverage in a country, and life expectancy is our outcome of interest, so that propensity score matching will be for the immunization coverage propensity. Nearest neighbor matching will be used next to find the closest match in the untreated group, keeping only the rows that are matched. Lastly, a matched sample will be run for common multiple regression analysis.Details of each steps and fitted model will be elaborated below.
 
 #### Propensity Score Matching Process
@@ -111,7 +110,7 @@ Logistic regression model on treatment is defined as $$log(\frac{\hat{p}}{1-\hat
 $$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI} 
 + \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{healthcoveragePercent}$$
 
-If we interpret each coefficients in the model, each $\hat{\beta}$ represents the relative change in log odds as the value for the predictor variable increases or decrease by one unit. For example, holding all other predictors constant, the one unit change in number of years attending school(0.7556) has stronger effect on log odds, comparing with the unit change in adult mortality(-0.0013), because of a larger absolute value of coefficients. The probability of vaccine coverage for each specific cases(rows) can be calculated based on variables value using the same procedure. Notice that the probability might be against the actual vaccine coverage result, which means the propensity score/our forcast does not imply whether treated or untreated.
+If we interpret each coefficients in the model, each $\hat{\beta}$ represents the relative change in log odds as the value for the predictor variable increases or decrease by one unit. For example, holding all other predictors constant, the one unit change in number of years attending school(0.7556) has stronger effect on log odds, comparing with the unit change in adult mortality(-0.0013), because of a larger absolute value of coefficients. The probability of vaccine coverage for each specific cases(rows) can be calculated based on variables value using the same procedure. Notice that the probability might be against the actual vaccine coverage result, which means the propensity score/our forecast does not imply whether treated or untreated.
 
 ```{r,echo=FALSE, message=FALSE}
 #logistic model
@@ -129,10 +128,9 @@ cleaned_data <- augment(propensity_score,
 
 cleaned_data <- cleaned_data %>%
   arrange(.fitted, vaccine_coverage_over_ave)
-
 ```
 
-Next, for every country which was actually treated(over world’s average immunization coverage), we match the untreated group(under world’s average immunization coverage) based on the similar propensity score.Basically, the propensity scores will be compared and matched from treated and untreated groups. After matching, the dataset has been reduced to 1226 observations with 17 columns. The dataset only keeps the observations that with matched propensity scores in treated and untreated groups.
+Next, for every country which was actually treated(over world’s average immunization coverage), we match the untreated group(under world’s average immunization coverage) based on the similar propensity score.Basically, the propensity scores will be compared and matched from treated and untreated groups. After matching, the dataset has been reduced to 1226 observations with 17 columns, and there are exactly 613 pairs of treated and untreated observations. The dataset only keeps the observations that with matched propensity scores in treated and untreated groups.
 
 ```{r,echo=FALSE, message=FALSE}
 cleaned_data$treated <- ifelse(cleaned_data$vaccine_coverage_over_ave == 1, 1, 0)
@@ -152,12 +150,12 @@ knitr::kable(cleaned_data_matched[1:10, 7:17])
 #### Actual causal inference analysis with logistic regresion model
 
 ```{r,echo=FALSE, message=FALSE}
-propensity_score_regression <- glm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
+propensity_score_regression <- lm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
 
 summary(propensity_score_regression)
 ```
 
-# Result
+# Discussion
 
 Consider influence of instrumental variable health care coverage
 
@@ -166,7 +164,6 @@ life_expectancy_on_healthcov <- lm(life_expectancy ~ healthcoverage_percent, dat
 vaccine_on_healthcov <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data) 
 
 coef(life_expectancy_on_healthcov)["healthcoverage_percent"] / coef(vaccine_on_healthcov)["healthcoverage_percent"]
-
 
 first_stage <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data)
 health_hat <- first_stage$fitted.values
