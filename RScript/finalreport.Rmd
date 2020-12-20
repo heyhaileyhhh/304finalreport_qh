@@ -1,5 +1,5 @@
 ---
-title: 'STA304 Final Report: Causal Inference Analysis on the Factor Immunization coverage that May Affect Life Expectancy'
+title: 'STA304 Final Project: Causal Inference Analysis on the Factor Immunization Coverage that May Affect Life Expectancy'
 author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
@@ -14,7 +14,6 @@ bibliography: reference.bib
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(tidyverse)
-library(skimr)
 library(arm)
 library(broom)
 library(huxtable)
@@ -22,6 +21,7 @@ library(dplyr)
 ```
 
 # Abstruct
+(reminder: mention question-driven or others...)
 
 # Key Words
 
@@ -31,14 +31,25 @@ Propensity Score, Causal Inference, Life expectancy, Immunization, Observational
 
 Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently and minimize effect of confounding factors. Moreover, observational data extracted from WHO is used in this report instead of complete experiment data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
-The main goal of this report is to find a causal relation between life expectancy and ea immunization coverage in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
+The main goal of this report is to find a whether a causal relation between life expectancy and ea immunization coverage is presented in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
-The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to find causal relations between factors with life expectancy. Other factors like countries economic condition, mortality and average education level will also be taken into consideration. In Methodology section(section 2), data cleaning is performed and model is built here. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Results of propensity score matching will be presented in Result section(section 3). Interpretation of the results, graphs, conclusion and further discussions will be included in the Discussion part(section 4).
+The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to find causal relations between factors with life expectancy. Other factors like countries economic condition, mortality and average education level will also be taken into consideration. In Methodology section(section 2), data cleaning is performed and model is built here. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Results of propensity score matching will be presented in Result section(section 3). Interpretation of the results, graphs, weakness, conclusion and further steps will be included in the Discussion part(section 4).
 
 
 # Methodology
 
-## Data Description and Data Cleaning
+### Data Description and Data Cleaning
+
+Some definitions of variables in the data set:
+
+- *life_expectancy*: Life Expectancy in age
+- *status*: A country's Developed or Developing status
+- *adult_mortality*: Adult Mortality Rates of both sexes (probability of dying between 15 and 60 years per 1000 population)
+- *Alcohol*: Alcohol, recorded per capita (15+) consumption (in litres of pure alcohol)
+- *healthcoverage_percent*: Expenditure on health as a percentage of Gross Domestic Product per capita(%)
+- *total_expenditure*: General government expenditure on health as a percentage of total government expenditure (%)
+- *Schooling*: Number of years of Schooling(years)
+- *vaccine_total_over_ave*: A binary variable recording whether a country's vaccine coverage is over the world's average vaccine coverage or not.
 
 The original data set is obtained from the World Health Organization (WHO) data repository. It contains detailed health related factors from 193 countries and corresponding economic status of each country from the United Nation website. It records people’s health status more than a decade, from 2000 to 2015. The data set has now been updated and reduced to 22 variables with 2938 rows by the user on Kaggle website, which contains mainly 5 categories: mortality factors, immunization related factors, economical factors, social/educational factors and personal habit factors.
 
@@ -75,13 +86,16 @@ knitr::kable(cleaned_data[1:15, 2:7])
 
 ## Model
 
-The propensity score (probability of being treated) will be estimated by constructing a logistic regression model at first. Our treatment is immunization coverage in a country, and life expectancy is our outcome of interest, so that propensity score matching will be for the immunization coverage propensity. Nearest neighbor matching will be used next to find the closest match in the untreated group, keeping only the rows that are matched. Lastly, a matched sample will be run for common multiple regression analysis.
 
-Firstly, logistic regression model is carried out, where the treatment immunization coverage is now presented as outcome based on different co-variates in our dataset. In this step, we think that predictors like countries' status, alcohol consumption, adult morality, GDP etc. are able to explain whether a country is treated or not. The model gives out the probability of the treatment. Propensity score is obtained here and added to the data set, which is exactly the probability of a country's vaccine coverage over world's average.
+The propensity score (probability of being treated) will be estimated by constructing a logistic regression model at first. Our treatment is immunization coverage in a country, and life expectancy is our outcome of interest, so that propensity score matching will be for the immunization coverage propensity. Nearest neighbor matching will be used next to find the closest match in the untreated group, keeping only the rows that are matched. Lastly, a matched sample will be run for common multiple regression analysis.Details of each steps and fitted model will be elaborated below.
+
+#### Propensity Score Matching Process
+
+Firstly, logistic regression model is carried out, where the treatment immunization coverage is now presented as outcome based on different co-variates in our dataset. In this step, we think that predictors like countries' status, alcohol consumption, adult morality, GDP etc. are able to explain whether a country is treated or not. The model gives out the probability of the treatment. Propensity scores for different countries are obtained here and added to the data set, which is exactly the probability of a country's vaccine coverage over world's average.
 
 Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors
 
-Intercept/variables | Estimates | P-value 
+Intercept/Predictors | Estimates | P-value 
 -----------|:-----------: |:-----------: |
 intercept  | -2.0880 | 4.81e-06 |   
 statusDeveloping  | -0.6484 | 0.0117 |
@@ -92,6 +106,12 @@ GDP  | 9.671e-05 | 9.60e-07 |
 BMI  | 0.0016 | 0.6362 |
 Schooling  | 0.7556 | < 2e-16 |
 healthcoverage_percent  | 0.0007 | 4.84e-09 |
+
+Logistic regression model on treatment is defined as $$log(\frac{\hat{p}}{1-\hat{p}}) = \hat{\beta_0} + \hat{\beta_1} *x_{statusDeveloping} +\hat{\beta_2}*x_{adultMortality} +\hat{\beta_3}*x_{Alcohol}+\hat{\beta_4}*x_{totalExpenditure} $$
+$$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI} 
++ \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{healthcoveragePercent}$$
+
+If we interpret each coefficients in the model, each $\hat{\beta}$ represents the relative change in log odds as the value for the predictor variable increases or decrease by one unit. For example, holding all other predictors constant, the one unit change in number of years attending school(0.7556) has stronger effect on log odds, comparing with the unit change in adult mortality(-0.0013), because of a larger absolute value of coefficients. The probability of vaccine coverage for each specific cases(rows) can be calculated based on variables value using the same procedure. Notice that the probability might be against the actual vaccine coverage result, which means the propensity score/our forcast does not imply whether treated or untreated.
 
 ```{r,echo=FALSE, message=FALSE}
 #logistic model
@@ -112,6 +132,7 @@ cleaned_data <- cleaned_data %>%
 
 ```
 
+Next, for every country which was actually treated(over world’s average immunization coverage), we match the untreated group(under world’s average immunization coverage) based on the similar propensity score.Basically, the propensity scores will be compared and matched from treated and untreated groups. After matching, the dataset has been reduced to 1226 observations with 17 columns. The dataset only keeps the observations that with matched propensity scores in treated and untreated groups.
 
 ```{r,echo=FALSE, message=FALSE}
 cleaned_data$treated <- ifelse(cleaned_data$vaccine_coverage_over_ave == 1, 1, 0)
@@ -120,18 +141,40 @@ matches <- arm::matching(z = cleaned_data$treated,
                          score = cleaned_data$.fitted)
 cleaned_data <- cbind(cleaned_data, matches)
 
-
 cleaned_data_matched <- cleaned_data %>%
   filter(match.ind != 0) %>%
   dplyr::select(-match.ind, -pairs, -treated)
 
-head(cleaned_data_matched)
+knitr::kable(cleaned_data_matched[1:10, 7:17])
+```
 
-propensity_score_regression <- lm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
+
+#### Actual causal inference analysis with logistic regresion model
+
+```{r,echo=FALSE, message=FALSE}
+propensity_score_regression <- glm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
 
 summary(propensity_score_regression)
-knitr::kable(huxtable::huxreg(propensity_score_regression))
 ```
+
+# Result
+
+Consider influence of instrumental variable health care coverage
+
+```{r,echo=FALSE, message=FALSE}
+life_expectancy_on_healthcov <- lm(life_expectancy ~ healthcoverage_percent, data = cleaned_data)
+vaccine_on_healthcov <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data) 
+
+coef(life_expectancy_on_healthcov)["healthcoverage_percent"] / coef(vaccine_on_healthcov)["healthcoverage_percent"]
+
+
+first_stage <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data)
+health_hat <- first_stage$fitted.values
+second_stage <- lm(life_expectancy ~ health_hat, data = cleaned_data)
+
+summary(second_stage)
+```
+
 
 
 
