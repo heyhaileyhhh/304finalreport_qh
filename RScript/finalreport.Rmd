@@ -1,5 +1,5 @@
 ---
-title: 'STA304 Final Project: Causal Inference Analysis on the Factor Immunization Coverage that May Affect Life Expectancy'
+title: 'STA304 Final Project: Causal Inference Analysis between the Factor Immunization Coverage and Life Expectancy'
 author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
@@ -57,6 +57,8 @@ I have cleaned the data set sourced from the Kaggle website by performing some b
 
 
 #### A glimpse of cleaned data set:
+
+Note that only part of the dataset is shown here
 
 ```{r,echo=FALSE,message=FALSE}
 #rename and select predictors/variables for later usage.
@@ -172,7 +174,7 @@ GDP  | 8.045e-05 | 0.147 |
 BMI  | 0.0739 | < 2e-16 |
 Schooling  | 1.487 | < 2e-16 |
 healthcoverage_percent  | 0.0001 | 0.652 |
-vaccine_coverage_over_ave | 3.52e-10 | 
+vaccine_coverage_over_ave | 1.6980 | 3.52e-10
 
 Other statistics and criteria of the model:
 
