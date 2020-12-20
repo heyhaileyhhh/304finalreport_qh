@@ -1,6 +1,5 @@
 ---
-title: 'STA304 Final Report: Causal Inference Analysis on the Factors that May Affect
-  Life Expectancy'
+title: 'STA304 Final Report: Causal Inference Analysis on the Factor Immunization coverage that May Affect Life Expectancy'
 author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
@@ -26,11 +25,11 @@ library(dplyr)
 
 # Key Words
 
-Propensity Score, Causal Inference, Life expectancy, Immunization, Observational study, Health care
+Propensity Score, Causal Inference, Life expectancy, Immunization, Observational study, Health.
 
 # Introduction
 
-Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Moreover, observational data extracted from WHO is used in this report instead of complete experiment data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
+Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently and minimize effect of confounding factors. Moreover, observational data extracted from WHO is used in this report instead of complete experiment data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
 The main goal of this report is to find a causal relation between life expectancy and ea immunization coverage in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and prolong life. Therefore it is non-negligible when we consider the factors that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
@@ -71,17 +70,37 @@ cleaned_data <- cleaned_data %>%
   mutate(vaccine_total = Polio+Diphtheria+Hepatitis_B) %>%
   mutate(vaccine_coverage_over_ave = ifelse(vaccine_total >= mean(vaccine_total), 1, 0))
 
-knitr::kable(cleaned_data[1:15, ])
+knitr::kable(cleaned_data[1:15, 2:7])
 ```
 
 ## Model
 
+The propensity score (probability of being treated) will be estimated by constructing a logistic regression model at first. Our treatment is immunization coverage in a country, and life expectancy is our outcome of interest, so that propensity score matching will be for the immunization coverage propensity. Nearest neighbor matching will be used next to find the closest match in the untreated group, keeping only the rows that are matched. Lastly, a matched sample will be run for common multiple regression analysis.
+
+Firstly, logistic regression model is carried out, where the treatment immunization coverage is now presented as outcome based on different co-variates in our dataset. In this step, we think that predictors like countries' status, alcohol consumption, adult morality, GDP etc. are able to explain whether a country is treated or not. The model gives out the probability of the treatment. Propensity score is obtained here and added to the data set, which is exactly the probability of a country's vaccine coverage over world's average.
+
+Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors
+
+Intercept/variables | Estimates | P-value 
+-----------|:-----------: |:-----------: |
+intercept  | -2.0880 | 4.81e-06 |   
+statusDeveloping  | -0.6484 | 0.0117 |
+adult_mortality  | -0.0013 | 0.0049 |
+Alcohol  | -0.0189 | 0.3301 |
+total_expenditure  | 0.0756 | 0.0023 |
+GDP  | 9.671e-05 | 9.60e-07 |
+BMI  | 0.0016 | 0.6362 |
+Schooling  | 0.7556 | < 2e-16 |
+healthcoverage_percent  | 0.0007 | 4.84e-09 |
+
 ```{r,echo=FALSE, message=FALSE}
-attach(cleaned_data)
+#logistic model
 propensity_score <- glm(vaccine_coverage_over_ave ~ status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent,
                         family = binomial,
                         data = cleaned_data)
+```
 
+```{r,echo=FALSE, message=FALSE}
 # add forecast to our data set
 cleaned_data <- augment(propensity_score,
                         data = cleaned_data,
@@ -91,12 +110,16 @@ cleaned_data <- augment(propensity_score,
 cleaned_data <- cleaned_data %>%
   arrange(.fitted, vaccine_coverage_over_ave)
 
+```
+
+
+```{r,echo=FALSE, message=FALSE}
 cleaned_data$treated <- ifelse(cleaned_data$vaccine_coverage_over_ave == 1, 1, 0)
 cleaned_data$treated <- as.integer(cleaned_data$treated)
 matches <- arm::matching(z = cleaned_data$treated,
                          score = cleaned_data$.fitted)
 cleaned_data <- cbind(cleaned_data, matches)
-detach(cleaned_data)
+
 
 cleaned_data_matched <- cleaned_data %>%
   filter(match.ind != 0) %>%
@@ -106,6 +129,7 @@ head(cleaned_data_matched)
 
 propensity_score_regression <- lm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
 
+summary(propensity_score_regression)
 knitr::kable(huxtable::huxreg(propensity_score_regression))
 ```
 
@@ -115,6 +139,19 @@ knitr::kable(huxtable::huxreg(propensity_score_regression))
 # Github Repo
 
 https://github.com/heyhaileyhhh/304finalreport_qh.git
+
+# Appendix
+
+Summary table of logistic regression model output between the treatment vaccine coverage and other co-variates
+```{r,echo=FALSE,message=FALSE}
+summary(propensity_score)
+```
+
+Summary table of logistic regression model output between the outcome life expectancy with propensity score added
+```{r,echo=FALSE,message=FALSE}
+summary(propensity_score_regression)
+```
+
 
 # References
 
