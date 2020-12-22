@@ -1,5 +1,5 @@
 ---
-title: 'STA304 Final Project: Causal Inference Analysis between the Factor Immunization Coverage and Life Expectancy'
+title: 'STA304 Final Project: Causal Inference Analysis between the Factor Immunization Coverage with other Possible factors on Life Expectancy'
 author: "Qihui Huang, 1004932905"
 date: "12/7/2020"
 output:
@@ -11,7 +11,7 @@ bibliography: reference.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.width=8, fig.height=4) 
 library(readr)
 library(tidyverse)
 library(arm)
@@ -31,7 +31,7 @@ Propensity Score, Causal Inference, Life expectancy, Immunization, Observational
 
 Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign data into two groups, causality cannot be inferred there because of the non-randomization, but propensity score matching could minimize effect of selection bias therefore the influence of confounding factors will be reduced effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
-The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and benefit all people's personal health in long run. Therefore it is non-negligible when we consider the factors like immunization rate that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
+The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Other related factors are also covered. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and benefit all people's personal health in long run. Therefore it is non-negligible when we consider the factors like immunization rate that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
 The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to find causal relations between factors with life expectancy. Other factors like countries economic condition, mortality and average education level will also be taken into consideration. In Methodology section(section 2), data cleaning is performed and model is built here. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Results of propensity score matching will be presented in Result section(section 3). Interpretation of the results, graphs, weakness, conclusion and further steps will be included in the Discussion part(section 4).
 
@@ -221,16 +221,59 @@ Residual standard error | 4.6420 |
 
 ### Interpretation of result in Model Section above
 
-After propensity score matching, the model is built on 8 variables within a multiple linear regression model that is going to estimate the life expectancy in different countries. The **Table 2** above shows the relationship between each predictors and the response variable life expectancy. Comparing their absolute value of the coefficients, number of years attending school and countries with vaccine coverage over world's average seems like imposing more positive effects on estimated life expectancy, which means these two factors correlates with the response variable and increase the people's life expectancy over 1 year, 1.487 years and 1.698 years respectively. Other factors like the status of a country(developed or developing country), GDP, BMI(coefficient 0.0739), alcohol consumption(coefficient -0.2710) and expenditure on health care(coefficient 0.0001) are less likely on extending life expectancy since they are either not strongly correlated with the outcome or they are bringing negative effect on the result. For instance, one unit increase in alcohol consumption brings down about 0.3 year of life expectancy, which imposes the most negative effect on our outcome; the variable GDP has tiny effect on life expectancy(coefficient 8.045e-05), the rise in life expectancy is so small so that can be ignored.
+After propensity score matching, the model is built on 8 variables within a multiple linear regression model that is going to estimate the life expectancy in different countries over a 15-year period. The **Table 2** above shows the relationship between each predictors and the response variable life expectancy. Comparing their absolute value of the coefficients, number of years attending school and countries with vaccine coverage over world's average seems like imposing more positive effects on estimated life expectancy, which means these two factors correlates with the response variable and increase the people's life expectancy over 1 year, 1.487 years and 1.698 years respectively. Other factors like the status of a country(developed or developing country), GDP, BMI(coefficient 0.0739), alcohol consumption(coefficient -0.2710) and expenditure on health care(coefficient 0.0001) are less likely on extending life expectancy since they are either not strongly correlated with the outcome or they are bringing negative effect on the result. For instance, one unit increase in alcohol consumption brings down about 0.3 year of life expectancy, which imposes the most negative effect on our outcome; the variable GDP has tiny effect on life expectancy(coefficient 8.045e-05), the rise in life expectancy is so small so that can be ignored.
 
 Judging from the P-value and other statistics in **Table 2** and **Table 3**, variables
 like GDP, health care coverage percentage and status of a country have significance level larger than 0.05, which means these variables may not have a linear relation with the response variable life expectancy, so that they almost contribute nothing on predicting life expectancy. The adjusted $R^2$ (0.7105) showed in **Table 3** is fairly close to 1, the largest value that $R^2$ can get. It measures how close are the data to fitted line. In this case, the model is valid since most of them are close to what we predict.
 
+### Plot 1: Relationship between Alcohol Consumption and Life Expectancy
+
+```{r,echo=FALSE, message=FALSE}
+cleaned_data_matched <- cleaned_data_matched %>%
+  mutate(alcohol_case = case_when(
+    Alcohol <= 3.0 ~ "Tiny",
+    Alcohol <= 6.0 & Alcohol > 3.0 ~ "Little",
+    Alcohol <= 12.0 & Alcohol > 6.0 ~ "Medium",
+    Alcohol <= 15.0 & Alcohol > 12.0 ~ "Large",
+    Alcohol > 15.0 ~ "Very Large"
+  )) %>%
+  mutate(life_expectancy_case = case_when(
+    life_expectancy <= 50 ~ "Before 50",
+    life_expectancy <= 60 & life_expectancy > 50 ~ "Before 60 after 50",
+    life_expectancy <= 70 & life_expectancy > 60 ~ "Before 70 after 60",
+    life_expectancy <= 80 & life_expectancy > 70 ~ "Before 80 after 70",
+    life_expectancy > 80 ~ "After 80"
+    ))
+
+plot1 <- ggplot(cleaned_data_matched, aes(x = life_expectancy_case, fill = alcohol_case)) + 
+  geom_bar() +
+  labs(title = "Proportion of alcohol consumption in life expectancy levels") +
+  xlab("Life expectancy levels") +
+  coord_flip()
+plot1
+```
 
 
+###  Plot 2: Relationship between vaccine coverage and Life Expectancy
 
-```{r}
+```{r,echo=FALSE, message=FALSE}
+plot2 <- 
+  ggplot(cleaned_data_matched, aes(x = life_expectancy_case, fill = as.factor(vaccine_coverage_over_ave))) + 
+  geom_bar() +
+  labs(title = "Proportion of vaccine coverage in life expectancy levels") +
+  xlab("Life expectancy levels") +
+  coord_flip() +
+  scale_fill_manual(name = "Vaccine coverage over average", ,labels=c("Less than average", "Over average"), values=c("lightblue", "orange"))
+plot2
+```
 
+### Table 4: Proportion between vaccine coverage and Life Expectancy
+
+```{r,echo=FALSE, message=FALSE}
+prop_reuslt <- cleaned_data_matched %>%
+  group_by(life_expectancy_case) %>%
+  summarise(proportion = mean(vaccine_coverage_over_ave))
+knitr::kable(prop_reuslt)
 ```
 
 
@@ -238,6 +281,13 @@ like GDP, health care coverage percentage and status of a country have significa
 
 
 
+
+cleaned_data_matched %>%
+  mutate(schooling_case = case_when(
+    Schooling <= 6.5 ~ "Very Short Period",
+    Schooling > 6.5 & Schooling <= 13 ~ "Short Period",
+    Schooling > 13 & Schooling <= 20.3 ~ "Long Period"
+  ))
 
 
 # Discussion
