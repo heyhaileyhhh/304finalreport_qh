@@ -229,7 +229,10 @@ Other factors like the status of a country(developed or developing country), GDP
 Judging from the P-value and other statistics in **Table 2** and **Table 3**, variables
 like GDP, health care coverage percentage and status of a country have significance level larger than 0.05, which means these variables may not have a linear relation with the response variable life expectancy, so that they almost contribute nothing on predicting life expectancy. The adjusted $R^2$ (0.7105) showed in **Table 3** is fairly close to 1, the largest value that $R^2$ can get. It measures how close are the data to fitted line. In this case, the model is valid since most of them are close to what we predict.
 
-### Plot 1: Relationship between Alcohol Consumption and Life Expectancy
+
+### Interpretation of result from other plots and tables
+
+#### Plot 1: Relationship between Alcohol Consumption and Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 cleaned_data_matched <- cleaned_data_matched %>%
@@ -255,9 +258,10 @@ plot1 <- ggplot(cleaned_data_matched, aes(x = life_expectancy_case, fill = alcoh
   coord_flip()
 plot1
 ```
+The barplot exhibits the proportion of alcohol consumption per person in different age groups over 15 years. According to the legend shown in the graph, it is obvious that people who consume a tiny bit of alcohol take up the largest part in each age group. By tiny bit, we mean under 3.0 liters per capita. Medium and little amount of consumption is also common in this case. Compared with the people who tend to have longer life expectancy, ones who are short-lived(especially people who died before 50)  tend to drink on “Little” level as it takes up almost half of the population.
 
 
-###  Plot 2: Relationship between vaccine coverage and Life Expectancy
+####  Plot 2: Relationship between vaccine coverage and Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 plot2 <- 
@@ -270,7 +274,7 @@ plot2 <-
 plot2
 ```
 
-### Table 4: Proportion of vaccine coverage in Life Expectancy
+#### Table 4: Proportion of vaccine coverage in Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 prop_reuslt <- cleaned_data_matched %>%
@@ -278,6 +282,8 @@ prop_reuslt <- cleaned_data_matched %>%
   summarise(proportion = mean(vaccine_coverage_over_ave))
 knitr::kable(prop_reuslt)
 ```
+
+Examining **Table4** and **Plot 2**, it shows the relationship between vaccine coverage and life expectancy. We notice that longer life expectancy cases generally have wider coverage of vaccination rate, while the shorter expectancy cases have lower coverage but not so much. In the age group from 60 to 70 and 70 to 80, the immunization coverage in these countries are all over the half of population in this category, around 51% got vaccinated in the 60-70 group and 12% more in 70- 80 age group. Other than these two groups, populations in countries with shorter life expectancy, like 50-60 and younger than 50 groups have limited coverage in vaccination, only about 30%-40% people have received vaccinations. As people with life expectancy over 80 have fewer cases, 11% immunization coverage is not significant here.
 
 
 ### Plot 3: Scatterplot of Schooling and Life Expectancy
