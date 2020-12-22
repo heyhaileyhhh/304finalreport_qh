@@ -11,13 +11,14 @@ bibliography: reference.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=4) 
+knitr::opts_chunk$set(fig.width=6, fig.height=3) 
 library(readr)
 library(tidyverse)
 library(arm)
 library(broom)
 library(huxtable)
 library(dplyr)
+library(ggplot2)
 ```
 
 # Abstruct
@@ -221,7 +222,9 @@ Residual standard error | 4.6420 |
 
 ### Interpretation of result in Model Section above
 
-After propensity score matching, the model is built on 8 variables within a multiple linear regression model that is going to estimate the life expectancy in different countries over a 15-year period. The **Table 2** above shows the relationship between each predictors and the response variable life expectancy. Comparing their absolute value of the coefficients, number of years attending school and countries with vaccine coverage over world's average seems like imposing more positive effects on estimated life expectancy, which means these two factors correlates with the response variable and increase the people's life expectancy over 1 year, 1.487 years and 1.698 years respectively. Other factors like the status of a country(developed or developing country), GDP, BMI(coefficient 0.0739), alcohol consumption(coefficient -0.2710) and expenditure on health care(coefficient 0.0001) are less likely on extending life expectancy since they are either not strongly correlated with the outcome or they are bringing negative effect on the result. For instance, one unit increase in alcohol consumption brings down about 0.3 year of life expectancy, which imposes the most negative effect on our outcome; the variable GDP has tiny effect on life expectancy(coefficient 8.045e-05), the rise in life expectancy is so small so that can be ignored.
+The **Table 2** above shows the relationship between each predictors and the response variable life expectancy. Comparing their absolute value of the coefficients, number of years attending school and countries with vaccine coverage over world's average seems like imposing more positive effects on estimated life expectancy, which means these two factors correlates with the response variable and increase the people's life expectancy over 1 year, 1.487 years and 1.698 years respectively. Causality can be confirmed here, between life expectancy and immunization coverage, and its p-value is also significant.
+
+Other factors like the status of a country(developed or developing country), GDP, BMI(coefficient 0.0739), alcohol consumption(coefficient -0.2710) and expenditure on health care(coefficient 0.0001) are less likely on extending life expectancy since they are either not strongly correlated with the outcome or they are bringing negative effect on the result. #For instance, one unit increase in alcohol consumption brings down about 0.3 year of life expectancy, which imposes the most negative effect on our outcome; the variable GDP has tiny effect on life expectancy(coefficient 8.045e-05), the rise in life expectancy is so small so that can be ignored.
 
 Judging from the P-value and other statistics in **Table 2** and **Table 3**, variables
 like GDP, health care coverage percentage and status of a country have significance level larger than 0.05, which means these variables may not have a linear relation with the response variable life expectancy, so that they almost contribute nothing on predicting life expectancy. The adjusted $R^2$ (0.7105) showed in **Table 3** is fairly close to 1, the largest value that $R^2$ can get. It measures how close are the data to fitted line. In this case, the model is valid since most of them are close to what we predict.
@@ -262,12 +265,12 @@ plot2 <-
   geom_bar() +
   labs(title = "Proportion of vaccine coverage in life expectancy levels") +
   xlab("Life expectancy levels") +
-  coord_flip() +
-  scale_fill_manual(name = "Vaccine coverage over average", ,labels=c("Less than average", "Over average"), values=c("lightblue", "orange"))
+  coord_flip() + 
+  scale_fill_discrete(name = "Vaccine over mean")
 plot2
 ```
 
-### Table 4: Proportion between vaccine coverage and Life Expectancy
+### Table 4: Proportion of vaccine coverage in Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 prop_reuslt <- cleaned_data_matched %>%
@@ -277,32 +280,25 @@ knitr::kable(prop_reuslt)
 ```
 
 
+### Plot 3: Scatterplot of Schooling and Life Expectancy
 
+```{r,echo=FALSE,message=FALSE}
+attach(cleaned_data_matched)
+plot(Schooling, life_expectancy, pch = 1, col = "black", main = "Scatterplot of life expectancy and years of Schooling", xlab = "Schooling(years)", ylab="Life expectancy")
+lines(lowess(life_expectancy~Schooling), col = "red", lwd = 2)
+detach(cleaned_data_matched)
+```
 
-
-
-
-cleaned_data_matched %>%
-  mutate(schooling_case = case_when(
-    Schooling <= 6.5 ~ "Very Short Period",
-    Schooling > 6.5 & Schooling <= 13 ~ "Short Period",
-    Schooling > 13 & Schooling <= 20.3 ~ "Long Period"
-  ))
 
 
 # Discussion
 
-Consider influence of instrumental variable health care coverage
+## Summary
 
-```{r,echo=FALSE, message=FALSE}
-life_expectancy_on_healthcov <- lm(life_expectancy ~ healthcoverage_percent, data = cleaned_data)
-vaccine_on_healthcov <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data) 
 
-coef(life_expectancy_on_healthcov)["healthcoverage_percent"] / coef(vaccine_on_healthcov)["healthcoverage_percent"]
+## Conclusion
 
-```
-
-# Conclusion
+## Weakness and next steps
 
 
 
