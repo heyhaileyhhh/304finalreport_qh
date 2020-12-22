@@ -29,7 +29,7 @@ Propensity Score, Causal Inference, Life expectancy, Immunization, Observational
 
 # Introduction
 
-Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign into two groups, causality cannot be inferred there, but propensity score matching could minimize effect of confounding factors effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
+Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign data into two groups, causality cannot be inferred there because of the non-randomization, but propensity score matching could minimize effect of selection bias therefore the influence of confounding factors will be reduced effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
 The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and benefit all people's personal health in long run. Therefore it is non-negligible when we consider the factors like immunization rate that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
@@ -38,25 +38,28 @@ The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to 
 
 # Methodology
 
-### Data Description and Data Cleaning
+### Data Description and Data Cleaning Process
 
 Some definitions of variables in the data set:
 
 - *life_expectancy*: Life Expectancy in age
-- *status*: A country's Developed or Developing status
+- *status*: A categorical variable, country's Developed or Developing status
 - *adult_mortality*: Adult Mortality Rates of both sexes (probability of dying between 15 and 60 years per 1000 population)
-- *Alcohol*: Alcohol, recorded per capita (15+) consumption (in litres of pure alcohol)
+- *Alcohol*: Alcohol, recording per capita (15+) consumption (in litres of pure alcohol)
 - *healthcoverage_percent*: Expenditure on health as a percentage of Gross Domestic Product per capita(%)
 - *total_expenditure*: General government expenditure on health as a percentage of total government expenditure (%)
+- *BMI*: Body Mass Index
 - *Schooling*: Number of years of Schooling(years)
 - *vaccine_total_over_ave*: A binary variable recording whether a country's vaccine coverage is over the world's average vaccine coverage or not.
 
 The original data set is obtained from the World Health Organization (WHO) data repository. It contains detailed health related factors from 193 countries and corresponding economic status of each country from the United Nation website. It records people’s health status more than a decade, from 2000 to 2015. The data set has now been updated and reduced to 22 variables with 2938 rows by the user on Kaggle website, which contains mainly 5 categories: mortality factors, immunization related factors, economical factors, social/educational factors and personal habit factors.
 
-I have cleaned the data set sourced from the Kaggle website by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned data set, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. For convenience's sake, especially in matching propensity scores, a new binary variable is created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming variables and removing rows with NA or invalid numbers are done in this part as well.
+I have cleaned the data set sourced from the Kaggle website by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned data set, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. 
 
+For convenience's sake, especially in matching propensity scores, a new binary variable is created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming variables and removing rows with NA or invalid numbers are done in this part as well.
 
-#### A glimpse of cleaned data set:
+\newpage
+#### A Glimpse of Cleaned Data Set:
 
 Note that only part of the dataset is shown here
 
@@ -92,13 +95,13 @@ The propensity score (probability of being treated) will be estimated by constru
 
 #### Propensity Score Matching Process
 
-Firstly, logistic regression model is carried out, where the treatment immunization coverage is now presented as outcome based on different co-variates in our dataset. In this step, we think that predictors like countries' status, alcohol consumption, adult morality, GDP etc. are able to explain whether a country is treated or not. The model gives out the probability of the treatment. Propensity scores for different countries are obtained here and added to the data set, which is exactly the probability of a country's vaccine coverage over world's average.
+Firstly, logistic regression model is chosen because the treatment is a binary variable, and we want to predict the probability of it as an outcome based off other factors in the dataset. Here, the treatment immunization coverage is now presented as outcome based on different co-variates in our dataset. In this step, we think that predictors like countries' status, alcohol consumption, adult morality, GDP etc. are able to explain whether a country is treated or not. The model gives out the probability of the treatment. Propensity scores for different countries are obtained here and added to the data set, which is exactly the probability of a country's vaccine coverage over world's average.
 
-Logistic regression model on treatment is defined as $$log(\frac{\hat{p}}{1-\hat{p}}) = \hat{\beta_0} + \hat{\beta_1} *x_{statusDeveloping} +\hat{\beta_2}*x_{adult\_mortality} +\hat{\beta_3}*x_{Alcohol}+\hat{\beta_4}*x_{total_expenditure} $$
+Logistic regression model on treatment is defined as $$log(\frac{\hat{p_{vaccine}}}{1-\hat{p_{vaccine}}}) = \hat{\beta_0} + \hat{\beta_1} *x_{statusDeveloping} +\hat{\beta_2}*x_{adult\_mortality} +\hat{\beta_3}*x_{Alcohol}+\hat{\beta_4}*x_{total_expenditure} $$
 $$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI} 
 + \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{health\_coverage\_percent}$$
 
-Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors
+**Table 1**: Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors
 
 Intercept/Predictors | Estimates | P-value 
 -----------|:-----------: |:-----------: |
@@ -112,7 +115,9 @@ BMI  | 0.0016 | 0.6362 |
 Schooling  | 0.7556 | < 2e-16 |
 healthcoverage_percent  | 0.0007 | 4.84e-09 |
 
-If we interpret each coefficients in the model, each $\hat{\beta}$ represents the relative change in log odds as the value for the predictor variable increases or decrease by one unit. For example, holding all other predictors constant, the one unit change in number of years attending school(0.7556) has stronger effect on log odds, comparing with the unit change in adult mortality(-0.0013), because of a larger absolute value of coefficients. The probability of vaccine coverage for each specific cases(rows) can be calculated based on variables value using the same procedure. Notice that the probability might be against the actual vaccine coverage result, which means the propensity score/our forecast does not imply whether treated or untreated.
+In **Table 1**, if we interpret each coefficients in the model, each $\hat{\beta}$ represents the relative change in log odds as the value for the predictor variable increases or decrease by one unit. For example, holding all other predictors constant, the one unit change in number of years attending school(0.7556) has stronger effect on log odds, comparing with the unit change in adult mortality(-0.0013), because of a larger absolute value of coefficients. The probability of vaccine coverage $\hat{p}$ for each specific cases(rows) can be calculated based on variables value using the same procedure. Notice that the probability might be against the actual vaccine coverage result, which means the propensity score/our forecast does not imply whether treated or untreated.
+
+Furthermore, most of the P-values of each predictor are smaller than the significance level 0.05, which means they all have contributions in logistic regression that predict the probability of vaccine coverage over average in one country. A few of them are greater than 0.05, but we keep this for now since it does not exert large effect on our result by now. 
 
 ```{r,echo=FALSE, message=FALSE}
 #logistic model
@@ -145,23 +150,25 @@ cleaned_data_matched <- cleaned_data %>%
   filter(match.ind != 0) %>%
   dplyr::select(-match.ind, -pairs, -treated)
 
-knitr::kable(cleaned_data_matched[1:10, 8:16])
+knitr::kable(cleaned_data_matched[1:10, 10:16])
 ```
 
 
-#### Actual causal inference analysis with multiple linear regresion model
+#### Actual Causal Inference Analysis with Multiple Linear Regresion Model
+
+The multiple linear regression is chosen since the response variable here, life expectancy, is a numeric. The rest of the variables are not showing any outstanding evidence to use other models, so multiple linear regression model might be the best choice. Diagnostic of the fitted model will be checked in the Weakness section.
 
 ```{r,echo=FALSE, message=FALSE}
 propensity_score_regression <- lm(life_expectancy~status+adult_mortality+Alcohol+total_expenditure+GDP+BMI+Schooling+healthcoverage_percent+vaccine_coverage_over_ave, data = cleaned_data_matched)
-summary(propensity_score_regression)
 ```
 
-The final multiple linear regression model is defined as:
-$$\hat{life\_expectancy} = \hat{\beta_0} + \hat{\beta_1} *x_{statusDeveloping} +\hat{\beta_2}*x_{adult\_mortality} +\hat{\beta_3}*x_{Alcohol}+\hat{\beta_4}*x_{total_expenditure} + $$
+The final fitted multiple linear regression model is defined as:
+$$\hat{life\_expectancy} = \hat{\beta_0} + \hat{\beta_1} *x_{statusDeveloping} +\hat{\beta_2}*x_{adult\_mortality} +\hat{\beta_3}*x_{Alcohol}+\hat{\beta_4}*x_{total\_expenditure} + $$
 $$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI} 
 + \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{health\_coverage\_percent} + \hat{\beta_8}*x_{vaccine\_coverage\_over\_ave}$$
 
-Coefficients are extracted from the summary table of the model:
+
+**Table 2**: Coefficients are extracted from the summary table of the model:
 
 Intercept/Predictors | Estimates | P-value 
 -----------|:-----------: |:-----------: |
@@ -176,7 +183,32 @@ Schooling  | 1.487 | < 2e-16 |
 healthcoverage_percent  | 0.0001 | 0.652 |
 vaccine_coverage_over_ave | 1.6980 | 3.52e-10 |
 
-Other statistics and criteria of the model:
+The final multiple regression model is produced after propensity score matching.The vaccine coverage predictor with other factors are added to predict the relationship between life expectancy and themselves. The intercept $\hat{\beta_0}$ represents the average of the life expectancy when other predictors have value 0. The rest of $\hat{\beta}$s before each predictors are the expected change in response variable life expectancy resulted from one unit change in this variable, holding other variables constant. If it is a categorical/binary variable, so then it measures the average difference in response variable based off different levels in this kind of variables.
+
+From **Table 2**:
+
+- $\hat{\beta_0}$: Intercept: the average of the life expectancy is 54.45 years when other predictors have value 0.
+
+- $\hat{\beta_1}$: The average difference between developing country and the baseline variable developed country is 0.182 years on life expectancy, holding other variables constant.
+
+- $\hat{\beta_2}$ : The expected change in life expectancy will decrease by 0.0306 years if adult mortality rate increases by one unit, holding other variables constant.
+
+- $\hat{\beta_3}$ :The expected change in life expectancy will decrease by 0.2710 years if alcohol consumption increases by one unit, holding other variables constant.
+
+- $\hat{\beta_4}$ :The expected change in life expectancy will decrease by 0.1446 years if total expenditure increases by one unit, holding other variables constant.
+
+- $\hat{\beta_5}$ :The expected change in life expectancy will increase by 8.045e-05 years if GDP increases by one unit, holding other variables constant.
+
+- $\hat{\beta_6}$ :The expected change in life expectancy will increase by 0.0739 years if BMI increases by one unit, holding other variables constant.
+
+- $\hat{\beta_7}$ :The expected change in life expectancy will increase by 1.487 years if years attending school increases by one unit, holding other variables constant.
+
+- $\hat{\beta_8}$ :The expected change in life expectancy will increase by 0.0001 years if health coverage percentage increases by one unit, holding other variables constant.
+
+- $\hat{\beta_8}$ :The expected change in life expectancy will increase by 1.698 years if vaccine coverage increases by one unit, holding other variables constant.
+
+
+**Table 3**: Other statistics and criteria of the model:
 
 Statistics | Value
 -----------|:-----------: |
@@ -185,7 +217,23 @@ Adjusted R-squared | 0.7105 |
 Residual standard error | 4.6420 |
 
 
-Since the propensity score matching process minimizes the effect of possible confounding variables.
+# Result
+
+### Interpretation of result in Model Section above
+
+After propensity score matching, the model is built on 8 variables within a multiple linear regression model that is going to estimate the life expectancy in different countries. The **Table 2** above shows the relationship between each predictors and the response variable life expectancy. Comparing their absolute value of the coefficients, number of years attending school and countries with vaccine coverage over world's average seems like imposing more positive effects on estimated life expectancy, which means these two factors correlates with the response variable and increase the people's life expectancy over 1 year, 1.487 years and 1.698 years respectively. Other factors like the status of a country(developed or developing country), GDP, BMI(coefficient 0.0739), alcohol consumption(coefficient -0.2710) and expenditure on health care(coefficient 0.0001) are less likely on extending life expectancy since they are either not strongly correlated with the outcome or they are bringing negative effect on the result. For instance, one unit increase in alcohol consumption brings down about 0.3 year of life expectancy, which imposes the most negative effect on our outcome; the variable GDP has tiny effect on life expectancy(coefficient 8.045e-05), the rise in life expectancy is so small so that can be ignored.
+
+Judging from the P-value and other statistics in **Table 2** and **Table 3**, variables
+like GDP, health care coverage percentage and status of a country have significance level larger than 0.05, which means these variables may not have a linear relation with the response variable life expectancy, so that they almost contribute nothing on predicting life expectancy. The adjusted $R^2$ (0.7105) showed in **Table 3** is fairly close to 1, the largest value that $R^2$ can get. It measures how close are the data to fitted line. In this case, the model is valid since most of them are close to what we predict.
+
+
+
+
+```{r}
+
+```
+
+
 
 
 
@@ -202,11 +250,6 @@ vaccine_on_healthcov <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, 
 
 coef(life_expectancy_on_healthcov)["healthcoverage_percent"] / coef(vaccine_on_healthcov)["healthcoverage_percent"]
 
-first_stage <- glm(vaccine_coverage_over_ave ~ healthcoverage_percent, data = cleaned_data)
-health_hat <- first_stage$fitted.values
-second_stage <- lm(life_expectancy ~ health_hat, data = cleaned_data)
-
-summary(second_stage)
 ```
 
 # Conclusion
@@ -232,7 +275,7 @@ Summary table of logistic regression model output between the outcome life expec
 summary(propensity_score_regression)
 ```
 
-
+\newpage
 # References
 
 
