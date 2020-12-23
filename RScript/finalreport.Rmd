@@ -21,6 +21,10 @@ library(dplyr)
 library(ggplot2)
 ```
 
+# Github Repo
+
+https://github.com/heyhaileyhhh/304finalreport_qh.git
+
 # Abstruct
 (reminder: mention question-driven or others...)
 
@@ -232,7 +236,7 @@ like GDP, health care coverage percentage and status of a country have significa
 
 ### Interpretation of result from other plots and tables
 
-#### Plot 1: Relationship between Alcohol Consumption and Life Expectancy
+Plot 1: Relationship between Alcohol Consumption and Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 cleaned_data_matched <- cleaned_data_matched %>%
@@ -261,7 +265,7 @@ plot1
 The barplot exhibits the proportion of alcohol consumption per person in different age groups over 15 years. According to the legend shown in the graph, it is obvious that people who consume a tiny bit of alcohol take up the largest part in each age group. By tiny bit, we mean under 3.0 liters per capita. Medium and little amount of consumption is also common in this case. Compared with the people who tend to have longer life expectancy, ones who are short-lived(especially people who died before 50)  tend to drink on “Little” level as it takes up almost half of the population.
 
 
-####  Plot 2: Relationship between vaccine coverage and Life Expectancy
+**Plot 2**: Relationship between vaccine coverage and Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 plot2 <- 
@@ -274,7 +278,7 @@ plot2 <-
 plot2
 ```
 
-#### Table 4: Proportion of vaccine coverage in Life Expectancy
+**Table 4**: Proportion of vaccine coverage in Life Expectancy
 
 ```{r,echo=FALSE, message=FALSE}
 prop_reuslt <- cleaned_data_matched %>%
@@ -286,7 +290,7 @@ knitr::kable(prop_reuslt)
 Examining **Table4** and **Plot 2**, it shows the relationship between vaccine coverage and life expectancy. We notice that longer life expectancy cases generally have wider coverage of vaccination rate, while the shorter expectancy cases have lower coverage but not so much. In the age group from 60 to 70 and 70 to 80, the immunization coverage in these countries are all over the half of population in this category, around 51% got vaccinated in the 60-70 group and 12% more in 70- 80 age group. Other than these two groups, populations in countries with shorter life expectancy, like 50-60 and younger than 50 groups have limited coverage in vaccination, only about 30%-40% people have received vaccinations. As people with life expectancy over 80 have fewer cases, 11% immunization coverage is not significant here.
 
 
-### Plot 3: Scatterplot of Schooling and Life Expectancy
+**Plot 3**: Scatterplot of Schooling and Life Expectancy
 
 ```{r,echo=FALSE,message=FALSE}
 attach(cleaned_data_matched)
@@ -295,26 +299,31 @@ lines(lowess(life_expectancy~Schooling), col = "red", lwd = 2)
 detach(cleaned_data_matched)
 ```
 
+As the number of years attending school is significant and contributes the most in prolonging life expectancy other than the vaccination coverage, a model is fitted between only life expectancy and years of schooling. It is clear that there is a relatively strong and positive relationship between the explanatory and the response variable. Life expectancy grows as the schooling years grows, which means these two are linearly correlated and the longer ones attended the school, ones are more likely to live longer than others,
 
 
 # Discussion
-
 ## Summary
 
+So far, we conduct analysis on causal inference between life expectancy and potential factors that may have the ability to influence life expectancy, mainly on the cause-effect relation of factor vaccination coverage and life expectancy. Other factors like number of years in school, people’s fitness measured in BMI, personal habits like alcohol intake and spending in healthcare are also taken into consideration. To accomplish our goals, propensity score matching is used here to reduce the bias therefore we can infer whether the casualty is presented. Furthermore, the multiple linear regression model is built for assessing the effects of all factors together to the life expectancy. Factors that are significant or strongly correlated with the response are picked out and investigated deeply. Details and interpretation of results will be discussed below.
 
 ## Conclusion
+
+In conclusion, there is a causality relation between vaccination coverage and life expectancy, based on 15-year period data of 193 countries around the world, meaning that wider coverage of immunization results in longer life expectancy. Countries with vaccination(Hepatitis B, Polio, Diphtheria tetanus toxoid vaccine) coverage over average world’s average coverage  tends to result in a longer life expectancy. The propensity score matching technique provides us with a matched dataset with minimized selection bias; after fitting the final linear regression model, the p-value of vaccination coverage over average variable is significant, which shows the cause-effect relation is actually presented here. To further investigate the relation between vaccination coverage and life expectancy, plot and proportion tables are drawn to visualize the relationship. Reading from the proportion table **Table 4**, it is clear that people with longer life expectancy have been vaccinated when they are young. People who do not get general types of vaccines are more likely to be short-lived, died before 60 years old. After all, the vaccination is important for ourselves and world's health system, and it will necessarily extend people's life, control the diseases that we have already known.
+
+Herd immunity is introduced these days during pandemic, and the ideal way to achieve this is to get vaccination. It means that when most people in a community are immune to the diseases, the rest of immune-compromised people are less unlikely to get the disease. So vaccines provide an immune response not only for healthy, normal people, but also protect the elderly, children, new born babies and people who are too weak to get vaccinated. Vaccines like Hepatitis B, Polio and Smallpox effectively controlled the spread of highly contagious diseases. Overall vaccination is important that could save thousands of people’s lives as well.[@citeHerdImmunity]
+
+Other factors that are significant in p-value are also noteworthy. Alcohol consumption is considered to be a major predictor in estimating life expectancy. From **Plot 1**,  populations are not over-drinking in most age groups. Most of them intake alcohol in a moderate quantity. At this consumption, the age group of 60-70 years has most of it. This shows that typical alcohol consumption at this amount is more likely to have a life expectancy falling in the 60-70 section, implying that small amount of intake (less than 3.0 liters per capita) will not affect our health system in a negative way; in contrast, drink moderate level of alcohol drinks occasionally may even beneficial to our bodies.  But we cannot simply conclude from this graph, as there are some large amounts of alcohol intake in long-lived groups. This usually varies in different individuals, but keeping a good drinking habit will definitely prolong people’s life.[@citeAlcohol]
+
+Factor years attending school is also significant, and is strongly correlated with life expectancy. Even though we cannot directly conclude a causality between schooling and one’s life duration, we could say with increasing number of years studying, people are inclined to obtain a longer lifetime. People study for a longer time to gain more knowledge about diseases, health care, fitness etc., so that they are able to and intend to acquire advanced medical resources. The dataset shows that the population with its citizens having more time at school spent more money on health care, also alcohol consumption is moderate, and BMI(body mass index) that measures one’s fitness is in good standard. This raises our awareness of receiving education, even if the importance may not be reflected immediately in our life but will benefit people in the long run.
 
 ## Weakness and next steps
 
 
 
 
+
 \newpage
-
-# Github Repo
-
-https://github.com/heyhaileyhhh/304finalreport_qh.git
-
 # Appendix
 
 Summary table of logistic regression model output between the treatment vaccine coverage and other co-variates
@@ -327,7 +336,6 @@ Summary table of logistic regression model output between the outcome life expec
 summary(propensity_score_regression)
 ```
 
-\newpage
 # References
 
 
