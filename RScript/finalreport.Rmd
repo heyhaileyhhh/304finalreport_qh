@@ -18,7 +18,6 @@ library(arm)
 library(broom)
 library(huxtable)
 library(dplyr)
-library(ggplot2)
 ```
 
 # Github Repo
@@ -26,7 +25,8 @@ library(ggplot2)
 https://github.com/heyhaileyhhh/304finalreport_qh.git
 
 # Abstruct
-(reminder: mention question-driven or others...)
+
+Life expectancy has always been an interesting topic, and lots of statistical researches have examine this using different kinds of indexes. Since immuniation has not been taken into consideration yet, we will look into this factor and find out the relation to life expectancy. This paper is about the causal inference and multiple linear relation between factors that influencing life expectancy. Propensity score matching, logistic regression and multiple linear regression model will be presented in this report, so that all analysis will be proceed based off these models mainly.
 
 # Key Words
 
@@ -34,9 +34,9 @@ Propensity Score, Causal Inference, Life expectancy, Immunization, Observational
 
 # Introduction
 
-Nowadays, the concept of causality has become more and more popular, not only in our daily life, but also in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign data into two groups, causality cannot be inferred there because of the non-randomization, but propensity score matching could minimize effect of selection bias therefore the influence of confounding factors will be reduced effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
+Nowadays, the concept of causality has become more and more popular in the domain of Statistics studies. Causal inference examines the potential cause and effect relations, that is how the outcome will change when the cause varies. It has been widely used for analysis in health, social, behavioral and economic sciences. With the techniques like propensity score matching being introduced, a quasi-experimental method, it helps us create artificial control groups to estimate the relation of the possible cause and effect conveniently. Usually, when we do not randomly assign data into two groups, causality cannot be inferred there because of the non-randomization, but propensity score matching could minimize effect of selection bias therefore the influence of confounding factors will be reduced effectively. Moreover, observational data extracted from WHO is used in this report instead of complete experimental data. As observational data is much more detailed and also a reliable source containing related rich information, more insights and creative observations/analysis can be performed here.
 
-The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Other related factors are also covered. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and benefit all people's personal health in long run. Therefore it is non-negligible when we consider the factors like immunization rate that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
+The main goal of this report is to find out that whether a causal relation between life expectancy and immunization coverage is presented in countries around the world in a 15 years period. Other related factors are also covered. Life expectancy has always been an intriguing topic, and there have been lots of studies conducted in the past on factors affecting life expectancy, like personal income, morality, alcohol consumption, GDP and health care insurance etc. During COVID-19 pandemic, topics like immunization and vaccination have become prominent, motivating us to explore the effect of the vaccines. As COVID vaccines are still in approval process, people all around the world are expecting the release of the vaccines that would lower down the number cases and benefit all people's personal health in long run. Therefore it is non-negligible when we consider the factors like immunization rate that may impose effects on life expectancy. This motivates us to explore the casual inference between the life expectancy and vaccination converge, and build a regression model based off multiple factors, considering data in a decade period all around the world. [@citeDataset]
 
 The data set from [@citeKaggleWebsite] will be used in this analysis. We aim to find causal relations between factors with life expectancy. Other factors like countries economic condition, mortality and average education level will also be taken into consideration. In Methodology section(section 2), data cleaning is performed and model is built here. Propensity score matching is used here to discern whether individuals get vaccinated already and whether individuals die before the average age of population. Results of propensity score matching will be presented in Result section(section 3). Interpretation of the results, graphs, weakness, conclusion and further steps will be included in the Discussion part(section 4).
 
@@ -57,13 +57,15 @@ Some definitions of variables in the data set:
 - *Schooling*: Number of years of Schooling(years)
 - *vaccine_total_over_ave*: A binary variable recording whether a country's vaccine coverage is over the world's average vaccine coverage or not.
 
-The original data set is obtained from the World Health Organization (WHO) data repository. It contains detailed health related factors from 193 countries and corresponding economic status of each country from the United Nation website. It records people’s health status more than a decade, from 2000 to 2015. The data set has now been updated and reduced to 22 variables with 2938 rows by the user on Kaggle website, which contains mainly 5 categories: mortality factors, immunization related factors, economical factors, social/educational factors and personal habit factors.
+The original data set is obtained from the World Health Organization (WHO) data repository. It contains detailed health related factors from 193 countries and corresponding economic status of each country from the United Nation website. It records people’s health status more than a decade, from 2000 to 2015. The data set has now been updated and reduced to 22 variables with 2938 rows by the user on Kaggle website, which contains mainly 5 categories: mortality factors, immunization related factors, economical factors, social/educational factors and personal habit factors. 
 
 I have cleaned the data set sourced from the Kaggle website by performing some basic data cleaning steps, including mutating and choosing specific variables. There are in total 22 variables including both categorical and numerical, and these are all potential factors that may impose different levels of effect on life expectancy; 13 of them have been chosen and put into a new cleaned data set, like *life expectancy*, *country*, *BMI* and different types of vaccines etc.. These variables are more representative and clean compared to other factors, and will be easily manipulated in the later analysis. 
 
 For convenience's sake, especially in matching propensity scores, a new binary variable is created, measuring whether a country’s immunization coverage exceeds the world’s average or not. This is simply done by adding all general vaccines coverage rate together for each country, then compared each of them with the mean of the world vaccine coverage. In this case, 1 represents the country has met the world’s average immunization coverage, and 0 represents the country has not met the criteria here yet. Moreover, renaming variables and removing rows with NA or invalid numbers are done in this part as well.
 
-\newpage
+Note: Packages used for cleaning and modeling are: [@citeBroom],[@citeTidyverse],[@citeReadr],[@citeArm],[@citeDplyr]
+
+
 #### A Glimpse of Cleaned Data Set:
 
 Note that only part of the dataset is shown here
@@ -106,7 +108,7 @@ Logistic regression model on treatment is defined as $$log(\frac{\hat{p_{vaccine
 $$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI} 
 + \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{health\_coverage\_percent}$$
 
-**Table 1**: Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors
+**Table 1: Summary coefficient table of fitted logistic regression model between treatment vaccine coverage and other factors**
 
 Intercept/Predictors | Estimates | P-value 
 -----------|:-----------: |:-----------: |
@@ -173,7 +175,7 @@ $$+ \hat{\beta_5}*x_{GDP} + \hat{\beta_6}*x_{BMI}
 + \hat{\beta_6}*x_{Schooling} + \hat{\beta_7}*x_{health\_coverage\_percent} + \hat{\beta_8}*x_{vaccine\_coverage\_over\_ave}$$
 
 
-**Table 2**: Coefficients are extracted from the summary table of the model:
+**Table 2: Coefficients are extracted from the summary table of the model**
 
 Intercept/Predictors | Estimates | P-value 
 -----------|:-----------: |:-----------: |
@@ -213,7 +215,7 @@ From **Table 2**:
 - $\hat{\beta_8}$ :The expected change in life expectancy will increase by 1.698 years if vaccine coverage increases by one unit, holding other variables constant.
 
 
-**Table 3**: Other statistics and criteria of the model:
+**Table 3: Other statistics and criteria of the model**
 
 Statistics | Value
 -----------|:-----------: |
@@ -236,7 +238,7 @@ like GDP, health care coverage percentage and status of a country have significa
 
 ### Interpretation of result from other plots and tables
 
-Plot 1: Relationship between Alcohol Consumption and Life Expectancy
+**Plot 1: Relationship between Alcohol Consumption and Life Expectancy**
 
 ```{r,echo=FALSE, message=FALSE}
 cleaned_data_matched <- cleaned_data_matched %>%
@@ -265,7 +267,7 @@ plot1
 The barplot exhibits the proportion of alcohol consumption per person in different age groups over 15 years. According to the legend shown in the graph, it is obvious that people who consume a tiny bit of alcohol take up the largest part in each age group. By tiny bit, we mean under 3.0 liters per capita. Medium and little amount of consumption is also common in this case. Compared with the people who tend to have longer life expectancy, ones who are short-lived(especially people who died before 50)  tend to drink on “Little” level as it takes up almost half of the population.
 
 
-**Plot 2**: Relationship between vaccine coverage and Life Expectancy
+**Plot 2: Relationship between vaccine coverage and Life Expectancy**
 
 ```{r,echo=FALSE, message=FALSE}
 plot2 <- 
@@ -317,25 +319,25 @@ Other factors that are significant in p-value are also noteworthy. Alcohol consu
 
 Factor years attending school is also significant, and is strongly correlated with life expectancy. Even though we cannot directly conclude a causality between schooling and one’s life duration, we could say with increasing number of years studying, people are inclined to obtain a longer lifetime. People study for a longer time to gain more knowledge about diseases, health care, fitness etc., so that they are able to and intend to acquire advanced medical resources. The dataset shows that the population with its citizens having more time at school spent more money on health care, also alcohol consumption is moderate, and BMI(body mass index) that measures one’s fitness is in good standard. This raises our awareness of receiving education, even if the importance may not be reflected immediately in our life but will benefit people in the long run.
 
-## Weakness and next steps
+## Weakness/Drawback & Next Steps
+
+For the a dataset I am working on, since the data was collected from 2000-2015, it is kind of outdated as the latest data is five years ago. Data and information changes rapidly when countries around the world are developing fast, so that the dataset might not be fitted into our current situation. But the data are detailed and authentic from the World Health Organization, so it is still meaningful since the general trend is not going to be reversed suddenly in a few years. Also, the technique like propensity score matching may also have some potential drawbacks. This method is trying to mimic complete randomization of data, but then turns out imbalance and bias the data are even more significant, because covariates value might be away from the treated value. We could use other method like caliper matching, radius matching or Mahalanobis distance, but these method are often complicated than the propensity score matching.
+
+For the model that was built previously, there are a few variables that are not significant which they probably do not follow a linear model, and it has not been taken out. So using these less significant variables might bias the result. The way to find a much more fitted model is to use backward elimination with BIC procedure. It will automatically select significant variables step by step, by removing the largest P-value(less significant) one at a time. The final model is stated as $\hat{life\_expectancy} = \hat{\beta_0} + \hat{\beta_1}adult\_mortality + \hat{\beta_2}Alcohol + \hat{\beta_3}GDP + \hat{\beta_4}BMI + \hat{\beta_5}Schooling + \hat{\beta_6}vaccine\_coverage\_over\_ave$
 
 
+```{r,echo=FALSE, message=FALSE}
+#Backward elimination with BIC
+#step(propensity_score_regression, direction = "backward", k=log(nrow(cleaned_data_matched)))
+```
 
+## Concluding Remarks
+
+The intention of this paper is to show statistical and scientific observations of factors that affecting the life expectancy, based off real data collected from World Health Organization(WHO). Even though the dataset is collected five years ago, we can still use it to estimate the general trend of it. As there is actually a causal relationship between vaccination coverage and life expectancy, getting vaccinated is crucial for not only protecting ourselves but also for our community, especially during COVID-19 pandemic. Moreover, developing healthy habits are also important in prolonging life, like limiting alcohol intake, exercising regularly, doing physical examination etc..
 
 
 \newpage
-# Appendix
-
-Summary table of logistic regression model output between the treatment vaccine coverage and other co-variates
-```{r,echo=FALSE,message=FALSE}
-summary(propensity_score)
-```
-
-Summary table of logistic regression model output between the outcome life expectancy with propensity score added
-```{r,echo=FALSE,message=FALSE}
-summary(propensity_score_regression)
-```
-
 # References
+
 
 
