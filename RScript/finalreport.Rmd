@@ -26,7 +26,7 @@ https://github.com/heyhaileyhhh/304finalreport_qh.git
 
 # Abstruct
 
-Life expectancy has always been an interesting topic, and lots of statistical researches have examine this using different kinds of indexes. Since immunization has not been taken into consideration yet, we will look into this factor and find out the relation to life expectancy. This question-driven analysis is about the causal inference and multiple linear relation between factors that influencing life expectancy. Propensity score matching, logistic regression and multiple linear regression model will be presented in this report, so that all analysis will be proceed based off these models mainly. 
+Life expectancy has always been an interesting topic, and lots of statistical researches have examine this using different kinds of indexes. Since immunization has not been taken into consideration yet, we will look into this factor and find out the relation to life expectancy. This question-driven is about the causal inference and multiple linear relation between factors that influencing life expectancy. Propensity score matching, logistic regression and multiple linear regression model will be presented in this report, so that all analysis will be proceed based off these models mainly. 
 
 # Key Words
 
